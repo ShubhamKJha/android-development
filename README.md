@@ -1,2 +1,2 @@
-# android-development
-Android Development
+# Android Development
+This repository stores my projects on Android.
