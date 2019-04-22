@@ -50,6 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tv_task_description"
+                android:onClick="delete_data"
                 android:src="@android:drawable/ic_menu_delete" />
 
             <ImageButton
@@ -58,6 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_task_description"
                 android:layout_toEndOf="@+id/ib_delete_task"
+                android:onClick="update_data"
                 android:src="@android:drawable/ic_menu_edit" />
         </RelativeLayout>
     </FrameLayout>

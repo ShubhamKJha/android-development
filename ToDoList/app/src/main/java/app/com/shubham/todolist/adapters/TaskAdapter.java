@@ -49,8 +49,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         Task task = list_of_tasks.get(i);
         viewHolder.title_tv.setText(task.getTitle());
         viewHolder.description_tv.setText(task.getDescription());
-        viewHolder.task_done_cb.setActivated(task.getTask_done());
+        viewHolder.task_done_cb.setChecked(task.getTask_done());
         viewHolder.task_done_cb.setTag(i);
+        viewHolder.update_image_btn.setTag(i);
+        viewHolder.del_image_btn.setTag(i);
     }
 
     @Override

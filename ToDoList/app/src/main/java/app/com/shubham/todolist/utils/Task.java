@@ -15,10 +15,10 @@ public class Task {
     }
 
 
-    public Task(String title, String description, int task_done) {
+    public Task(String title, String description, boolean task_done) {
         Title = title;
         Description = description;
-        this.task_done = (task_done == 1);
+        this.task_done = task_done;
     }
 
     public String getTitle() {
