@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+    <TextView
+        android:id="@+id/tv_task_name"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        tools:text="This is a demo task"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:textStyle="bold"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:textAllCaps="true"
+        android:layout_toLeftOf="@+id/task_done_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <CheckBox
+        android:id="@+id/task_done_check_box"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:button="@null"
+        android:background="?android:attr/listChoiceIndicatorMultiple"
+        android:onClick="change_to_done"
+        android:layout_alignParentEnd="true"/>
+
+    <FrameLayout
+        android:id="@+id/fl_description_window"
+        android:layout_width="wrap_content"
+        android:layout_alignStart="@+id/tv_task_name"
+        android:layout_alignEnd="@+id/tv_task_name"
+        android:layout_below="@+id/tv_task_name"
+        android:visibility="gone"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/tv_task_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                tools:text="This is a demo description of the task whatever be suitable for the taskis given here"/>
+
+            <ImageButton
+                android:id="@+id/ib_delete_task"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_task_description"
+                android:src="@android:drawable/ic_menu_delete" />
+
+            <ImageButton
+                android:id="@+id/ib_edit_task"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_task_description"
+                android:layout_toEndOf="@+id/ib_delete_task"
+                android:src="@android:drawable/ic_menu_edit" />
+        </RelativeLayout>
+    </FrameLayout>
+
+
+
+</RelativeLayout>
