@@ -17,4 +17,14 @@ public interface GetDataService {
             @Query("nojsoncallback") int nojsoncallback,
             @Query("extras") String extras
     );
+
+    @GET("/services/rest/?")
+    Call<Example> getSearchResults(
+            @Query("method") String method,
+            @Query("api_key") String api_key,
+            @Query("format") String format,
+            @Query("nojsoncallback") int nojsoncallback,
+            @Query("extras") String extras,
+            @Query("text") String text
+    );
 }

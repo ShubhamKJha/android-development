@@ -2,8 +2,12 @@ package app.com.shubham.practice_retrofit.activity;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -14,14 +18,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import app.com.shubham.practice_retrofit.R;
 import app.com.shubham.practice_retrofit.adapter.CustomAdapter;
+import app.com.shubham.practice_retrofit.fragments.Main_Fragment;
+import app.com.shubham.practice_retrofit.fragments.Search_Fragment;
 import app.com.shubham.practice_retrofit.model.Example;
 import app.com.shubham.practice_retrofit.model.Photo;
 import app.com.shubham.practice_retrofit.network.GetDataService;
@@ -44,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private int nojsoncallback = 1;
     private String format = "json";
     private String extras = "url_s";
+    private String search_method = "flickr.photos.search";
+    private boolean search_window_on = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setMessage("Loading....");
         progressDialog.show();
 
-        /*Create handle for the RetrofitInstance interface*/
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new Main_Fragment())
+                .commit();
 
         refresh_page(page);
 
@@ -62,25 +74,36 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                TextView page_num = null;
                 switch (menuItem.getItemId()){
                     case R.id.nav_more:
-                        page += 1;
-                        progressDialog.show();
-                        refresh_page(page);
-                        break;
-                    case R.id.nav_home:
-                        page = 1;
-                        progressDialog.show();
-                        refresh_page(page);
+                        if(search_window_on) break;
+                        page+=1;
+                        show_page(page);
                         break;
                     case R.id.nav_search:
-                        search_bar();
+                        if(!search_window_on) {
+                            start_search_window();
+                            search_page(null);
+                            search_window_on = ! search_window_on;
+                            break;
+                        }
+                        search_window_on = false;
+                        start_main_window();
+                        show_page(page);
+                        break;
+                    case R.id.nav_home:
+                        search_window_on = false;
+                        page = 1;
+                        start_main_window();
+                        show_page(page);
                         break;
                     case R.id.nav_back:
+                        if(search_window_on) break;
                         if(page>1){
-                            page -= 1;
-                            progressDialog.show();
-                            refresh_page(page);
+                            page-=1;
+                            show_page(page);
+                            break;
                         }
                         break;
 
@@ -89,10 +112,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
     }
 
-    private void refresh_page(int page) {
+    private void refresh_page(final int page) {
         if(caller!=null)
             caller.cancel();
 
@@ -103,25 +125,73 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull  Call<Example> call,@NonNull Response<Example> response) {
                 progressDialog.dismiss();
-                generateDataList(response.body());
+                photoList = response.body().getPhotos().getPhoto();
+                generateDataList();
             }
 
             @Override
             public void onFailure(Call<Example> call, Throwable t) {
                 progressDialog.dismiss();
-                Toast.makeText(MainActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+                RelativeLayout main_view = (RelativeLayout)findViewById(R.id.main_layout);
+                Snackbar.make(main_view,"Something went wrong! ",Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Retry", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                search_window_on = false;
+                                refresh_page(page);
+                            }
+                        })
+                        .show();
             }
         });
     }
 
-    /*Method to generate List of data using RecyclerView with custom adapter*/
-    private void generateDataList(Example example) {
-        recyclerView = findViewById(R.id.customRecyclerView);
-        photoList = example.getPhotos().getPhoto();
+    private void search_page(final String text){
+        if(caller!=null)
+            caller.cancel();
 
-        adapter = new CustomAdapter(this,photoList);
+        if(text == null || text.equals("")){
+            photoList = new ArrayList<Photo>();
+            generateDataList();
+        }
+
+        else {
+            GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+            caller = service.getSearchResults(
+                    search_method, api_key, format, nojsoncallback, extras, text
+            );
+            caller.enqueue(new Callback<Example>() {
+                @Override
+                public void onResponse(@NonNull Call<Example> call, @NonNull Response<Example> response) {
+                    progressDialog.dismiss();
+                    photoList = response.body().getPhotos().getPhoto();
+                    generateDataList();
+                }
+
+                @Override
+                public void onFailure(Call<Example> call, Throwable t) {
+                    progressDialog.dismiss();
+                    RelativeLayout main_view = (RelativeLayout)findViewById(R.id.main_layout);
+                    Snackbar.make(main_view,"Something went wrong! ",Snackbar.LENGTH_INDEFINITE)
+                            .setAction("Retry", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    search_window_on = false;
+                                    start_search(null);
+                                }
+                            })
+                            .show();
+                }
+            });
+        }
+    }
+
+    /*Method to generate List of data using RecyclerView with custom adapter*/
+    private void generateDataList() {
+        recyclerView = findViewById(R.id.customRecyclerView);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(MainActivity.this, 3);
         recyclerView.setLayoutManager(layoutManager);
+        adapter = new CustomAdapter(this,photoList);
         recyclerView.setAdapter(adapter);
     }
 
@@ -152,20 +222,33 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void search_bar(){
-        LinearLayout llm = new LinearLayout(this);
-        llm.setOrientation(LinearLayout.VERTICAL);
+    private void start_main_window(){
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new Main_Fragment())
+                .addToBackStack(null)
+                .commit();
+        getSupportFragmentManager().executePendingTransactions();
+    }
 
-        final EditText textView = new EditText(this);
-        llm.addView(textView);
+    private void start_search_window(){
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new Search_Fragment())
+                .addToBackStack(null)
+                .commit();
+        getSupportFragmentManager().executePendingTransactions();
+    }
 
-//      TODO: No action is added to search option. Should be addded.
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setTitle("Search Dialog Box")
-                .setMessage("Enter something to search:")
-                .setView(llm)
-                .setPositiveButton("SEARCH", null)
-                .setNegativeButton("BACK",null).create();
-        alertDialog.show();
+    public void start_search(View v){
+        EditText search_text_box = (EditText)findViewById(R.id.et_search_bar);
+        String search_query = search_text_box.getText().toString();
+        progressDialog.show();
+        search_page(search_query);
+    }
+
+    private void show_page(int page){
+        progressDialog.show();
+        refresh_page(page);
+        TextView page_num = (TextView)findViewById(R.id.tv_main_page_no);
+        page_num.setText("PAGE "+page);
     }
 }

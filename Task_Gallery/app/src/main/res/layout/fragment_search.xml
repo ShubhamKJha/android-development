@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/search_bar"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/et_search_bar"
+            android:layout_weight=".9"
+            android:background="@android:color/darker_gray"
+            android:layout_marginLeft="8dp"
+            android:hint="Enter something.."
+            android:layout_marginTop="7dp"
+            android:layout_width="0dp"
+            android:layout_height="38dp" />
+        <ImageButton
+            android:layout_weight=".1"
+            android:src="@android:drawable/ic_menu_search"
+            android:layout_width="wrap_content"
+            android:onClick="start_search"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@+id/search_bar"
+        android:id="@+id/customRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/navigationView"
+        />
+
+</RelativeLayout>
